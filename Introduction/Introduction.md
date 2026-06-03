@@ -45,6 +45,10 @@ Organization can assign many private IPs while using single public ips for exter
 # how load balancer are distributes traffic using IPs.
  ## Dns load balancing:
  - Multiple ips are assigned to domain and DNS helps to direct traffic based on availability and location
+ - - Round robin : each dns quey get a different sever ip in a rotating order
+ - - GeoLocation based routing: directs users to closest data center this reduces latency.
+ - - failover dns: if a server fails the dns resolver removes from it from the list and direct  traffic to the healthy server
+ - - Anycast DNS : Uses the same ip address across multiple locations routing requests to the nearest server.
  ## layer 4 (Transport layer)
  - Ip addressed and ports
  ## layer 7 Application layer
@@ -57,4 +61,46 @@ client request ip for domain
 first checks in cache and otherwise query is forwarded.
 now TLD(Top-level domain) server It points your device to authoritative name sever which is responsible for that specific website
 authoritative server provides the exact IP addeess allowing the browser to load
+now client connects and caches the results.
 
+Dns look up
+
+User types Domain 
+  |
+Browser Cache check
+|
+OS Cache check
+|
+Local DNS reolver (ISP)
+|
+Root DNS Server (queries from one of 13 root dns servers)
+|
+TLD Name server (Org,com,.net) provides authorative details
+|
+Authoritative Name server( responses with correct ips addreess )
+| 
+IP addresses Returned
+|
+response cached and loaded
+
+                        root
+                /        |    \
+    .Org               .com    . net
+    /                   |          \
+nypti.org           google.com     schenectidycounty.net
+/    \
+test.nypti,org dev.nypti.org  
+
+
+# Recursive and authoritative dns servers
+
+intermediate third party providers for client  and other dns servers like cloudfare( recent issue remember)
+
+authoritatives stores actual dns records(A ,cname,MX) for a domain
+managed by domain owners or hosting providers.
+
+## DNS related securities threats and mitigation
+DDos attacks on dns: continuosly calling the server and making domain unreachable(rate limiting,anycast dns,loadbalancing)
+man in the middle attacks : intercept dns queries to manipulate reponses (use encrypted dns like dns-over-https (DOH) or dns-over-tls(DOT))
+Dns spoofing/cache poising: attachers injects false dns records and redirects to malicios websites(Domain name system security extensions)
+NXDomain attack: attachers flood dns resolvers with queries for non-existing domains exhauting servers resources.(reponse rate limiting and dns firewalls)
